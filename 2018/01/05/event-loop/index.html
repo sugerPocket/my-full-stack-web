@@ -3,22 +3,22 @@
 <head>
     <meta charset="utf-8">
     
-    <title>html 前端面试题汇总 | Sugerpocket</title>
+    <title>浅析 event loop 事件队列 microTask 和 macroTask 的区别 | Sugerpocket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="个人收集的 web 前端 html 面试题, 为来年春招做准备, 仅供参考.">
-<meta name="keywords" content="web前端,面试,html,html5">
+    <meta name="description" content="javascript 是单线程的，但是如果遇到了不得不等待的任务，js 引擎并不会阻塞进程，而是异步地将任务添加到队列，不阻塞主进程，使得主进程可以先执行其他任务，等到进程空闲，再检查任务队列，本篇就 js 中的事件循环机制与任务队列调度的细节进行探讨。">
+<meta name="keywords" content="web前端,nodejs,javascript">
 <meta property="og:type" content="article">
-<meta property="og:title" content="html 前端面试题汇总">
-<meta property="og:url" content="http://sugerpocket.github.io/2017/12/21/html-interview-quiz/index.html">
+<meta property="og:title" content="浅析 event loop 事件队列 microTask 和 macroTask 的区别">
+<meta property="og:url" content="http://sugerpocket.github.io/2018/01/05/event-loop/index.html">
 <meta property="og:site_name" content="Sugerpocket">
-<meta property="og:description" content="个人收集的 web 前端 html 面试题, 为来年春招做准备, 仅供参考.">
+<meta property="og:description" content="javascript 是单线程的，但是如果遇到了不得不等待的任务，js 引擎并不会阻塞进程，而是异步地将任务添加到队列，不阻塞主进程，使得主进程可以先执行其他任务，等到进程空闲，再检查任务队列，本篇就 js 中的事件循环机制与任务队列调度的细节进行探讨。">
 <meta property="og:locale" content="zh-cn">
-<meta property="og:image" content="http://sugerpocket.github.io/2017/12/21/html-interview-quiz/thum.jpg">
-<meta property="og:updated_time" content="2017-12-21T09:00:24.763Z">
+<meta property="og:image" content="http://sugerpocket.github.io/2018/01/05/event-loop/thum.jpeg">
+<meta property="og:updated_time" content="2018-01-05T06:34:21.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="html 前端面试题汇总">
-<meta name="twitter:description" content="个人收集的 web 前端 html 面试题, 为来年春招做准备, 仅供参考.">
-<meta name="twitter:image" content="http://sugerpocket.github.io/2017/12/21/html-interview-quiz/thum.jpg">
+<meta name="twitter:title" content="浅析 event loop 事件队列 microTask 和 macroTask 的区别">
+<meta name="twitter:description" content="javascript 是单线程的，但是如果遇到了不得不等待的任务，js 引擎并不会阻塞进程，而是异步地将任务添加到队列，不阻塞主进程，使得主进程可以先执行其他任务，等到进程空闲，再检查任务队列，本篇就 js 中的事件循环机制与任务队列调度的细节进行探讨。">
+<meta name="twitter:image" content="http://sugerpocket.github.io/2018/01/05/event-loop/thum.jpeg">
     
 
     
@@ -213,12 +213,12 @@
 </aside>
 
             
-            <section id="main"><article id="post-html-interview-quiz" class="article article-type-post" itemscope itemprop="blogPost">
+            <section id="main"><article id="post-event-loop" class="article article-type-post" itemscope itemprop="blogPost">
     <div class="article-inner">
         
             
 	
-		<img src="/2017/12/21/html-interview-quiz/thum.jpg" class="article-banner" />
+		<img src="/2018/01/05/event-loop/thum.jpeg" class="article-banner" />
 	
 
 
@@ -229,7 +229,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-            html 前端面试题汇总
+            浅析 event loop 事件队列 microTask 和 macroTask 的区别
         </h1>
     
 
@@ -238,22 +238,17 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2017/12/21/html-interview-quiz/">
-            <time datetime="2017-12-20T18:16:24.000Z" itemprop="datePublished">2017-12-21</time>
+        <a href="/2018/01/05/event-loop/">
+            <time datetime="2018-01-05T05:18:16.000Z" itemprop="datePublished">2018-01-05</time>
         </a>
     </div>
 
 
                         
-    <div class="article-category">
-    	<i class="fa fa-folder"></i>
-        <a class="article-category-link" href="/categories/web前端/">web前端</a>
-    </div>
-
                         
     <div class="article-tag">
         <i class="fa fa-tag"></i>
-        <a class="tag-link" href="/tags/html/">html</a>, <a class="tag-link" href="/tags/html5/">html5</a>, <a class="tag-link" href="/tags/web前端/">web前端</a>, <a class="tag-link" href="/tags/面试/">面试</a>
+        <a class="tag-link" href="/tags/javascript/">javascript</a>, <a class="tag-link" href="/tags/nodejs/">nodejs</a>, <a class="tag-link" href="/tags/web前端/">web前端</a>
     </div>
 
                     </div>
@@ -264,145 +259,46 @@
         <div class="article-entry" itemprop="articleBody">
         
             
-            <p>个人收集的 web 前端 html 面试题, 为来年春招做准备, 仅供参考.<br><a id="more"></a></p>
-<p></p><h5 style="color: #949494">2017/12/21</h5><p></p>
-<h4 id="1-lt-meta-gt-标签与其作用"><a href="#1-lt-meta-gt-标签与其作用" class="headerlink" title="1. &lt;meta&gt; 标签与其作用"></a>1. &lt;meta&gt; 标签与其作用</h4><p>更详细请参考 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/meta" target="_blank" rel="noopener">&lt;meta&gt; - HTML（超文本标记语言） | MDN</a></p>
-<h5 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h5><p><code>charset</code></p>
-<p>声明文档所使用的字符编码</p>
-<ul>
-<li>默认 ASCII (推荐 UTF-8)</li>
-</ul>
-<p><code>content</code></p>
-<p>  为 http-equiv 或者 name 提供值</p>
-<p><code>http-equiv</code><br>  预定义 http 响应头</p>
-<p>枚举值：</p>
-<ul>
-<li><p>“content-security-policy”内容安全策略<br>详情参考 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy" target="_blank" rel="noopener">content-security-policy | MDN</a>.</p>
-</li>
-<li><p>“content-type”<br>指定默认的响应 MIME 类型</p>
-</li>
-<li><p>“default-style”<br>规定要使用的预定义的样式表。(其 content 的值必须是同一文档下某个 link 的 title 值)</p>
-</li>
-<li><p>“refresh”<br>定义文档自动刷新的时间间隔（个人不清楚有什么用）</p>
-</li>
-</ul>
-<p><code>name</code></p>
-<p>不可与 charset, itemprop, http-equiv 同时使用于一个 meta 之上</p>
-<p>枚举值:</p>
-<ul>
-<li><p>application-name:<br>定义运行在网页上的具体应用名称，与 title 不同</p>
-</li>
-<li><p>author:<br>文档作者</p>
-</li>
-<li><p>desscription:<br>关于页面内容的简短描述</p>
-</li>
-<li><p>generator:<br>表明生成这个页面的应用程序</p>
-</li>
-<li><p>keywords:<br>描述网站的关键字</p>
-</li>
-<li><p>referrer:<br>控制所有从该文档发出的 HTTP 请求中HTTP Referer 首部的内容：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"referrer"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+            <p>javascript 是单线程的，但是如果遇到了不得不等待的任务，js 引擎并不会阻塞进程，而是异步地将任务添加到队列，不阻塞主进程，使得主进程可以先执行其他任务，等到进程空闲，再检查任务队列，本篇就 js 中的事件循环机制与任务队列调度的细节进行探讨。</p>
+<a id="more"></a>
+<p>实际上，js 引擎并不只维护一个任务队列，总共有三种任务</p>
+<ol>
+<li>Task(macroTask): <code>setTimeout</code>, <code>setInterval</code>, <code>setImmediate</code>, <code>I/O</code>, <code>UI rendering</code></li>
+<li>microTask: <code>Promise</code>, <code>process.nextTick</code>, <code>Object.observe</code>, <code>MutationObserver</code>, <code>MutaionObserver</code></li>
+</ol>
+<p>按照一般（之前的理解），这些函数都只是添加任务到队列里面，似乎并无差别</p>
+<p>看这段经典代码，体会一下</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">&#125;, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> <span class="title">executor</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">1</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">    i == <span class="number">9999</span> &amp;&amp; resolve();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">5</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>简单的 event-loop 理解，答案是</p>
+<p>1<br>2<br>3<br>4<br>5</p>
+<p>好吧，错了，答案是</p>
+<p>1<br>2<br>3<br>5<br>4</p>
+<p>这说明 <code>Promise.then</code> 注册的任务先执行了，why？</p>
+<p>我们再来看一下之前说的 <code>Promise</code> 注册的任务属于 <code>microTask</code>，<code>setTimeout</code> 属于 <code>Task</code>，两者有何差别？</p>
+<p>好吧，实际上，microTasks 和 Tasks 并不在同一个队列里面，他们的调度机制也不相同。比较具体的是这样：</p>
 <blockquote>
-<p>动态插入 referrer 是没有作用的，定义冲突会采用 no-referer 策略</p>
+<p>个人总结，参考资料在文章末尾，有错误欢迎指正</p>
 </blockquote>
-<p>content 属性可取的值：</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center"></th>
-<th style="text-align:center"></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">no-referrer</td>
-<td style="text-align:center">不要发送 HTTP Referer 首部。</td>
-</tr>
-<tr>
-<td style="text-align:center">origin</td>
-<td style="text-align:center">发送当前文档的 origin。</td>
-</tr>
-<tr>
-<td style="text-align:center">no-referrer-when-downgrade</td>
-<td style="text-align:center">当目的地是先验安全的(https-&gt;https)则发送 origin 作为 referrer ，但是当目的地是较不安全的 (https-&gt;http)时则不发送 referrer 。这个是默认的行为。</td>
-</tr>
-<tr>
-<td style="text-align:center">origin-when-crossorigin</td>
-<td style="text-align:center">在同源请求下，发送完整的URL (不含查询参数) ，其他情况下则仅发送当前文档的 origin。</td>
-</tr>
-<tr>
-<td style="text-align:center">unsafe-URL</td>
-<td style="text-align:center">在同源请求下，发送完整的URL (不含查询参数)。</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>viewport<br><a href="https://developer.mozilla.org/zh-CN/docs/Mobile/Viewport_meta_tag" target="_blank" rel="noopener">viewport 控制布局 | MDN</a><br>属性值：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">value</th>
-<th style="text-align:left">可能值</th>
-<th style="text-align:left">描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">width</td>
-<td style="text-align:left">一个正整数或者字符串</td>
-<td style="text-align:left">device-width    defines the width, in pixels, of the viewport</td>
-</tr>
-<tr>
-<td style="text-align:center">height</td>
-<td style="text-align:left">一个正整数或者字符串</td>
-<td style="text-align:left">device-height defines the height, in pixels, of the viewport</td>
-</tr>
-<tr>
-<td style="text-align:center">initial-scale</td>
-<td style="text-align:left">一个0.0 到10.0之间的正数</td>
-<td style="text-align:left">defines the ratio between the device width (device-width in portrait mode or device-height in landscape mode) and the viewport size.</td>
-</tr>
-<tr>
-<td style="text-align:center">maximum-scale</td>
-<td style="text-align:left">一个0.0 到10.0之间的正数</td>
-<td style="text-align:left">defines the maximum value of the zoom; it must be greater or equal to the minimum-scale or the behavior is indeterminate.</td>
-</tr>
-<tr>
-<td style="text-align:center">minimum-scale</td>
-<td style="text-align:left">一个0.0 到10.0之间的正数</td>
-<td style="text-align:left">defines the minimum value of the zoom; it must be smaller or equal to the maximum-scale or the behavior is indeterminate.</td>
-</tr>
-<tr>
-<td style="text-align:center">user-scalable</td>
-<td style="text-align:left">一个布尔值（yes 或者no）</td>
-<td style="text-align:left">If set to no, the user is not able to zoom in the webpage. Default value is yes.</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>robots:<br>定义爬虫如何索引以及处理该页面</li>
-</ul>
-<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>meta 标签为文档定义一系列元数据，预定义浏览器的行为，对 SEO 优化有很大帮助。</p>
-<h4 id="2-SEO-优化需要注意的地方有什么"><a href="#2-SEO-优化需要注意的地方有什么" class="headerlink" title="2. SEO 优化需要注意的地方有什么"></a>2. SEO 优化需要注意的地方有什么</h4><ul>
-<li>合理的title、description、keywords：搜索对着三项的权重逐个减小，title值强调重点即可，重要关键词出现不要超过2次，而且要靠前，不同页面title要有所不同；description把页面内容高度概括，长度合适，不可过分堆砌关键词，不同页面description有所不同；keywords列举出重要关键词即可</li>
-<li>语义化的HTML代码，符合W3C规范：语义化代码让搜索引擎容易理解网页</li>
-<li>重要内容HTML代码放在最前：搜索引擎抓取HTML顺序是从上到下，有的搜索引擎对抓取长度有限制，保证重要内容一定会被抓取</li>
-<li>重要内容不要用js输出：爬虫不会执行js获取内容</li>
-<li>少用iframe：搜索引擎不会抓取iframe中的内容</li>
-<li>非装饰性图片必须加alt</li>
-<li>提高网站速度：网站速度是搜索引擎排序的一个重要指标</li>
-</ul>
-<h4 id="3-DOCTYPE"><a href="#3-DOCTYPE" class="headerlink" title="3. DOCTYPE"></a>3. DOCTYPE</h4><ul>
-<li><code>&lt;!doctype&gt;</code>声明必须处于HTML文档的头部，在<code>&lt;html&gt;</code>标签之前，HTML5中不区分大小写</li>
-<li><code>&lt;!doctype&gt;</code>声明不是一个HTML标签，是一个用于告诉浏览器当前HTMl版本的指令</li>
-<li>现代浏览器的html布局引擎通过检查doctype决定使用兼容模式还是标准模式对文档进行渲染，一些浏览器有一个接近标准模型。</li>
-<li>在HTML4.01中<code>&lt;!doctype&gt;</code>声明指向一个DTD，由于HTML4.01基于SGML，所以DTD指定了标记规则以保证浏览器正确渲染内容</li>
-<li>HTML5不基于SGML，所以不用指定DTD，使用 <code>&lt;!DOCTYPE html&gt;</code> 就可以声明</li>
-</ul>
+<ol>
+<li>event-loop start</li>
+<li>microTasks 队列开始清空（执行）</li>
+<li>检查 Tasks 是否清空，有则跳到 4，无则跳到 6</li>
+<li>从 Tasks 队列抽取一个任务，执行</li>
+<li>检查 microTasks 是否清空，若有则跳到 2，无则跳到 3</li>
+<li>结束 event-loop</li>
+</ol>
+<p>好，也就是说，microTasks 队列在一次事件循环里面不止检查一次，我们做个实验</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 添加三个 Task</span></span><br><span class="line"><span class="comment">// Task 1</span></span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">4</span>);</span><br><span class="line">&#125;, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Task 2</span></span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">6</span>);</span><br><span class="line">  <span class="comment">// 添加 microTask</span></span><br><span class="line">  promise.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">8</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Task 3</span></span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">7</span>);</span><br><span class="line">&#125;, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> <span class="title">executor</span>(<span class="params">resolve</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">1</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++) &#123;</span><br><span class="line">    i == <span class="number">9999</span> &amp;&amp; resolve();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">2</span>);</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="number">5</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>以上这段代码在开始添加三个任务到 Tasks 里面，并且第二个 task 会添加一个 microTask</p>
+<p>预测一下结果：</p>
+<p>若每次执行一个 task 都会检查 microTask 队列，那么 microTask 会先于 task 3 执行，8 将会先于 7 输出，结果应该为</p>
+<p>1<br>2<br>3<br>5<br>4<br>6<br>8<br>7</p>
+<p>如果只检查一遍 microTasks，那么 8 将于下一次 event-loop 输出，也就是最后输出，结果应该为</p>
+<p>1<br>2<br>3<br>5<br>4<br>6<br>7<br>8</p>
+<p>毫无疑问，结果是前者（仔细阅读那段简单的测试代码，理解一下，复制粘贴试试结果，没有图片难以形象地描述）</p>
+<p>结论就是，microTasks 会在每个 Task 执行完毕之后检查清空，而这次 event-loop 的新 task 会在下次 event-loop 检测。</p>
+<p>对于大部分开发者来说，异步队列就好似不存在一般，我们只管用就可以了，有一定经验的人会了解事件循环，任务队列，但是很少人知道他们的实现细节，虽然这对开发来说无关紧要，但理解基础的东西会帮助开发者更好地解决问题（或许哪一天就踩到了坑呢）。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://juejin.im/entry/58332d560ce46300610e4bad" target="_blank" rel="noopener">https://juejin.im/entry/58332d560ce46300610e4bad</a><br><a href="https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/" target="_blank" rel="noopener">https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/</a><br><a href="https://flyyang.github.io/2017/03/07/javascript%E4%B8%AD%E7%9A%84microtask%E4%B8%8Etask/" target="_blank" rel="noopener">https://flyyang.github.io/2017/03/07/javascript%E4%B8%AD%E7%9A%84microtask%E4%B8%8Etask/</a><br><a href="https://hao5743.github.io/2017/02/27/%E5%AF%B9node%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E6%9C%BA%E5%88%B6%E4%B8%ADMacrotask%E5%92%8CMicrotask%E7%9A%84%E7%90%86%E8%A7%A3/" target="_blank" rel="noopener">https://hao5743.github.io/2017/02/27/%E5%AF%B9node%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E6%9C%BA%E5%88%B6%E4%B8%ADMacrotask%E5%92%8CMicrotask%E7%9A%84%E7%90%86%E8%A7%A3/</a><br><a href="https://github.com/ccforward/cc/issues/48" target="_blank" rel="noopener">https://github.com/ccforward/cc/issues/48</a><br><a href="https://github.com/creeperyang/blog/issues/21" target="_blank" rel="noopener">https://github.com/creeperyang/blog/issues/21</a><br><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/EventLoop" target="_blank" rel="noopener">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/EventLoop</a></p>
 
         
         </div>
@@ -413,7 +309,7 @@
 
 </div>
 
-    <a data-url="http://sugerpocket.github.io/2017/12/21/html-interview-quiz/" data-id="cjc1jy7q100050jcqfmrwctin" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://sugerpocket.github.io/2018/01/05/event-loop/" data-id="cjc1jy7pq00000jcqsnqtx3d1" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -488,15 +384,11 @@
         
 <nav id="article-nav">
     
-        <a href="/2017/12/21/javascript-interview-quiz/" id="article-nav-newer" class="article-nav-link-wrap">
-            <strong class="article-nav-caption">Newer</strong>
-            <div class="article-nav-title">
-                
-                    js 前端面试题汇总
-                
-            </div>
-        </a>
     
+        <a href="/2017/12/26/learn-shadow-DOM/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">learn-shadow-DOM</div>
+        </a>
     
 </nav>
 
